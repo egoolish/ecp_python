@@ -36,3 +36,4 @@ Example
 --------------------------------------------------
 
 The example.py file contains various basic examples demonstrating how to use the ecp package, as well as the similarities to the R version.
+Note that this file does require the package **rpy2** as well as its dependencies. 

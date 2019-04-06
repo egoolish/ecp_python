@@ -6,7 +6,7 @@ setup(
     author='Ethan Goolish',
     author_email='ethangoolish@gmail.com',
     packages=['ecp'],
-    install_requires=['numpy', 'scipy', 'rpy2'],
+    install_requires=['numpy', 'scipy'],
     version='0.1',
     license='MIT',
     description='ecp is a Python package containing various procedures for finding multiple change-points',
