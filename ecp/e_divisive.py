@@ -193,7 +193,7 @@ def sig_test(D, R, changes, min_size, obs):
         tmp = e_split(changes_copy2, D1, min_size, True)
         if(tmp['best'] >= obs):
             over = over + 1
-    pval = (1 + over)/(R + 1)
+    pval = (1 + over)/float((R + 1))
     return [pval, R]
 
 def perm_cluster(D, points):

@@ -37,3 +37,9 @@ Example
 
 The example.py file contains various basic examples demonstrating how to use the ecp package, as well as the similarities to the R version.
 Note that this file does require the package **rpy2** as well as its dependencies. 
+
+Support
+--------------------------------------------------
+
+Note: the ecp package was built with users of Python 3 in mind. With the EOL of Python 2.7, users should be aware of the
+possibility of untested bugs. Upgrading to the latest version of Python 3 is the safest way to ensure proper output.
