@@ -3,6 +3,7 @@ import numpy as np
 import rpy2.robjects.packages as rpackages
 from rpy2.robjects.vectors import StrVector
 import e_divisive as pye
+import e_agglomerative
 
 utils = rpackages.importr('utils')
 utils.chooseCRANmirror(ind=1)
@@ -21,7 +22,23 @@ data = robjects.r("""
     y2 = e.divisive(X=x2,sig.lvl=0.05,R=499,k=NULL,min.size=30,alpha=1)
     y1_no_perm = e.divisive(X = x1, k = 2, min.size = 30, alpha = 1)
     y2_no_perm = e.divisive(X = x2, k = 1, min.size = 30, alpha = 1)
+    
+    mem = rep(c(1,2,3,4),times=c(10,10,10,10))
+    x_agg = as.matrix(c(rnorm(10,0,1),rnorm(20,2,1),rnorm(10,-1,1)))
+    y_agg = e.agglo(X=x_agg,member=mem,alpha=1,penalty=function(cp,Xts) 0)
     """)
+
+py_agglo_X1 = np.array(robjects.r["x_agg"])
+py_agglo_mem1 = np.array(robjects.r["mem"])
+py_agglo_Y1 = \
+    e_agglomerative.e_agglo(X = py_agglo_X1, \
+                            member=py_agglo_mem1, \
+                            alpha = 1, \
+                            penalty = (lambda cp: 0))
+print(py_agglo_Y1)
+rY1 = robjects.r["y_agg"]
+print(rY1)
+
 pyX1 = np.array(robjects.r["x1"])
 pyY1_no_perm = pye.e_divisive(X = pyX1, k = 2, min_size = 30, alpha = 1)
 print(pyY1_no_perm)
