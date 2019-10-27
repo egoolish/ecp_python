@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='ecp',
-    url='https://github.com/jladan/package_demo',
+    url='https://github.com/egoolish/ecp_python',
     author='Ethan Goolish',
     author_email='ethangoolish@gmail.com',
     packages=['ecp'],
