@@ -4,12 +4,11 @@ import numpy as np
 # array, X is the observed data set, alpha is the exponent used on the Euclidean distance.
 def e_agglo(X, member = None, alpha = 1, penalty = lambda cps : 0):
     if member is None:
-        member = np.arange(1, (X.shape)[0])
+        member = np.arange(X.shape[0])
     if (alpha <= 0) or (alpha > 2):
         raise ValueError("The alpha argument must be in (0, 2].")
     if(not callable(penalty)):
         raise ValueError("The penalty argument must be a function.")
-    
     ret = process_data(member, X, alpha)
     n = ret["n"]
 
