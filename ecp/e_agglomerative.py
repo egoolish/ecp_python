@@ -15,7 +15,6 @@ def e_agglo(X, member = None, alpha = 1, penalty = lambda cps : 0):
 
     #Find which clusters optimize the GOF and then update distances
     for k in range(n-1+1, 2*n-2+1):
-
         #find which clusters to merge
         best = find_closest(k, ret) 
         #update GOF statistic
@@ -31,8 +30,13 @@ def e_agglo(X, member = None, alpha = 1, penalty = lambda cps : 0):
     ret["estimates"] = np.argmax(ret["fit"])
     ret["estimates"] = np.sort(ret["progression"][ret["estimates"]])
     ret["estimates"] = ret["estimates"][~np.isnan(ret["estimates"])].astype(int)
+    
+    #Fix the Python 0-indexing.
+    ret["estimates"] = ret["estimates"] - 1
+    ret["progression"] = ret["progression"] - 1
+
     # Remove change point N + 1 if a cyclic merger was performed
-    if(ret["estimates"][0] != 1):
+    if(ret["estimates"][0] != 0):
         ret["estimates"] = ret["estimates"][:-1]
     
     # Create final membership vector
@@ -43,7 +47,7 @@ def e_agglo(X, member = None, alpha = 1, penalty = lambda cps : 0):
         tmp = np.insert(tmp, 0, 0)
 
         ret["cluster"] = np.repeat(np.arange(0,len(np.diff(tmp))), np.diff(tmp))
-        k = X.shape[0] - np.size(ret["cluster"]) + 1
+        k = X.shape[0] - np.size(ret["cluster"])
         ret["cluster"] = np.append(ret["cluster"], np.zeros(k, dtype = int))
     
     # Remove unnecessary output info
@@ -98,6 +102,7 @@ def process_data(member, X, alpha):
     within = np.zeros(n)
     for i in range(n):
         within[i] = get_within(alpha, np.full((ret["sizes"][i], X.shape[1]), X[member == i]))
+    
     #Make distance matrix
     ret["d"] = np.full((2*n, 2*n), np.float("inf"))
     for i in range(n):
@@ -109,6 +114,7 @@ def process_data(member, X, alpha):
                 ret["d"][i, j] = gb
                 ret["d"][j, i] = gb
     np.fill_diagonal(ret["d"], 0.0)
+
     #Set initial GOF value
     for i in range(n):
         fit = fit + ret["d"][i, ret["left"][i]] + ret["d"][i, ret["right"][i]]
@@ -229,17 +235,30 @@ def get_within(alpha, X):
     alpha = float(alpha)
     ret = 0.0
     n = X.shape[0]
-    for i in range(n):
-        for j in range(n):
-            ret += np.power(np.sqrt(np.sum((X[i, :] - X[j, :])*(X[i, :] - X[j, :]))), alpha)
-    return (ret/(n*n))
+
+    #Slow C version
+    # for i in range(n):
+    #     for j in range(n):
+    #         ret += np.power(np.sqrt(np.sum((X[i, :] - X[j, :])*(X[i, :] - X[j, :]))), alpha)
+    # return (ret/(n*n))
+
+    #Vectorized:
+    Xprime = X.reshape(n, 1, X.shape[1])
+    ret = np.sum(np.power(np.sqrt(np.einsum('ijk, ijk->ij', X-Xprime, X-Xprime)), alpha))
+    return ret/(n*n)
 
 def get_between(alpha, X, Y):
     alpha = float(alpha)
     ret = 0.0
     n = X.shape[0]
     m = Y.shape[0]
-    for i in range(n):
-        for j in range(m):
-            ret += np.power(np.sqrt(np.sum(np.power(X[i]-Y[j], 2))), alpha)
+
+    #Slow C version
+    # for i in range(n):
+    #     for j in range(m):
+    #         ret += np.power(np.sqrt(np.sum(np.power(X[i]-Y[j], 2))), alpha)
+    
+    #Vectorized:
+    X = X.reshape(X.shape[0], 1, X.shape[1])
+    ret = np.sum(np.power(np.sqrt(np.einsum('ijk, ijk->ij', X-Y, X-Y)), alpha))
     return (2*ret)/float(n*m)
